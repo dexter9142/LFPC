@@ -7,7 +7,7 @@ import java.util.*;
         public static Map<String, List<String>> Rules = new HashMap<String, List<String>>();
 
         String compar = "S";
-        String input = "abaabb";
+        String input = "abaabaabb";
 
 
         public static void main(String[] args) {
@@ -16,14 +16,10 @@ import java.util.*;
             Rules.put("B", new ArrayList<String>(Arrays.asList("bC", "aB")));
             Rules.put("C", new ArrayList<String>(Arrays.asList("aA", "b")));
 
+            System.out.println(Arrays.asList(Rules));
+
             Main main = new Main();
             main.cycle();
-
-
-            System.out.println(Arrays.asList(Rules));
-            System.out.println(Rules.values());
-            System.out.println(Arrays.toString(Rules.keySet().toArray()));
-
 
         }
 
@@ -31,6 +27,12 @@ import java.util.*;
         public void cycle() {
             for (int i = 0; i < input.length(); i++) {
                 while (i < input.length()) {
+
+                    if (!input.matches("[ab]+")) {       //look for characters that are NOT a or b
+                        System.out.println("Incorrect string");
+                        return;
+                    }
+
                     if (Arrays.toString(Rules.keySet().toArray()).contains("S")&& compar.contains("S") && input.charAt(i) == 'a') {//0
                         compar = compar.replace("S", "aA");
                         i++;
@@ -65,20 +67,16 @@ import java.util.*;
                         System.out.println("\t" + compar);
                     }
                     if (compar.endsWith("S") || compar.endsWith("A") || compar.endsWith("B") || compar.endsWith("C")) {
-                        System.out.println("Se termina");
+                        System.out.println("Neterminal at the final.");
                     }
                     if (compar.equals(input)) {
-                        System.out.println("Este egal");
+                        System.out.println("String conforms to the rules.");
+                        return;
+                    }else if(i==compar.length()) {
+                        System.out.printf("String unbuildable.");
                         return;
                     }
                 }
             }
         }
     }
-
-
-
-
-/////////////////////////////////////////////////////////////
-
-
