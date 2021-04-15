@@ -3,7 +3,7 @@ import copy
 import re
 
 # Remove large rules (more than 2 states in the right part, eg. A->BCD)
-def large(rules,let,voc):
+def large(rules,let,new_rules):
 
     # Make a hard copy of the dictionary (as its size is changing over the
     # process)
@@ -23,7 +23,7 @@ def large(rules,let,voc):
                     # add new rules
                     else:
                         rules.setdefault(new_key, []).append(values[i][j] + let[0])
-                    voc.append(let[0])
+                    new_rules.append(let[0])
                     # save letter, as it'll be used in next rule
                     new_key = copy.deepcopy(let[0])
                     # remove letter from free ascii_letters list
@@ -31,11 +31,11 @@ def large(rules,let,voc):
                 # last 2 ascii_letters remain always the same
                 rules.setdefault(new_key, []).append(values[i][-2:])
 
-    return rules,let,voc
+    return rules,let,new_rules
 
 
 # Remove empty rules (A->e)
-def empty(rules,voc):
+def empty(rules,new_rules):
 
     # list with keys of empty rules
     e_list = []
@@ -53,7 +53,7 @@ def empty(rules,voc):
         # if key doesn't contain any values, remove it from dictionary
         if len(rules[key]) == 0:
             if key not in rules:
-                voc.remove(key)
+                new_rules.remove(key)
             rules.pop(key, None)
 
     # delete empty rules
@@ -74,14 +74,14 @@ def empty(rules,voc):
                     if values[i][0]!=values[i][1]:
                         rules.setdefault(key, []).append(values[i][0])
 
-    return rules,voc
+    return rules,new_rules
 
 # Remove short rules (A->B)
-def short(rules,voc):
+def short(rules,new_rules):
 
     # create a dictionary in the form letter:letter (at the beginning
     # D(A) = {A})
-    D = dict(zip(voc, voc))
+    D = dict(zip(new_rules, new_rules))
 
     # just transform value from string to list, to be able to insert more values
     for key in D:
@@ -89,7 +89,7 @@ def short(rules,voc):
 
     # for every letter A of the vocabulary, if B->C, B in D(A) and C not in D(A)
     # add C in D(A)
-    for letter in voc:
+    for letter in new_rules:
         for key in rules:
             if key in D[letter]:
                 values = rules[key]
@@ -154,7 +154,7 @@ def print_rules(rules):
 def main():
 
     rules = {}
-    voc = []
+    new_rules = []
     # This list's going to be our "ascii_letters pool" for naming new states
     let = list(ascii_letters[26:]) + list(ascii_letters[:25])
 
@@ -178,39 +178,35 @@ def main():
 character!')                        #.*$ //Zero or more of any character (except line break) followed by end of string
         else:break
 
-    print ('+------------------------------------------------------+')
-    print ('|Give rules in the form A B (space-delimited), for A->B|')
-    print ('|or A BCD, if more than one states in the right part   |')
-    print ('|(without spaces between right part members).          |')
-    print ('+------------------------------------------------------+')
+    print("Enter rules this way:S B")
 
     for i in range(N):
         # A rule is actually in the form fr->to. However, user gives fr to.
         fr, to = map(str,input('Rule #' + str(i + 1)).split())
         # Remove given ascii_letters from "ascii_letters pool"
         for l in fr:
-            if l!='e' and l not in voc: voc.append(l)
+            if l!='e' and l not in new_rules: new_rules.append(l)
             if l in let: let.remove(l)
         for l in to:
-            if l!='e' and l not in voc: voc.append(l)
+            if l!='e' and l not in new_rules: new_rules.append(l)
             if l in let: let.remove(l)
         # Insert rule to dictionary
         rules.setdefault(fr, []).append(to)
 
     # remove large rules and print new rules
     print ('\nRules after large rules removal')
-    rules,let,voc = large(rules,let,voc)
+    rules,let,new_rules = large(rules,let,new_rules)
     print_rules(rules)
-    #print voc
+    #print new_rules
 
     # remove empty rules and print new rules
     print ('\nRules after empty rules removal')
-    rules,voc = empty(rules,voc)
+    rules,new_rules = empty(rules,new_rules)
     print_rules(rules)
-    #print voc
+    #print new_rules
 
     print ('\nRules after short rules removal')
-    rules,D = short(rules,voc)
+    rules,D = short(rules,new_rules)
     print_rules(rules)
 
     print ('\nFinal rules')
